@@ -47,7 +47,7 @@ if test "$RADIO" != "" -a "$RADIOFILE" = ""
 then
   unzip -d tmp ${SRCPREFIX}$PRODUCT-target_files-$BUILD.zip RADIO/$RADIOSRC
 fi
-if test "$CDMARADIO" != ""
+if test "$CDMARADIO" != "" -a "$CDMARADIOFILE" = ""
 then
   unzip -d tmp ${SRCPREFIX}$PRODUCT-target_files-$BUILD.zip RADIO/radio-cdma.img
 fi
@@ -75,14 +75,19 @@ then
 fi
 if test "$CDMARADIO" != ""
 then
-  cp tmp/RADIO/radio-cdma.img tmp/$PRODUCT-$VERSION/radio-cdma-$DEVICE-$CDMARADIO.img
+  if test "$CDMARADIOFILE" = ""
+  then
+    cp tmp/RADIO/radio-cdma.img tmp/$PRODUCT-$VERSION/radio-cdma-$DEVICE-$CDMARADIO.img
+  else
+    cp $CDMARADIOFILE tmp/$PRODUCT-$VERSION/radio-cdma-$DEVICE-$CDMARADIO.img
+  fi
 fi
 
 # Write flash-all.sh
 cat > tmp/$PRODUCT-$VERSION/flash-all.sh << EOF
 #!/bin/sh
 
-# Copyright 2011 The Android Open Source Project
+# Copyright 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -235,7 +240,7 @@ EOF
 cat > tmp/$PRODUCT-$VERSION/flash-base.sh << EOF
 #!/bin/sh
 
-# Copyright 2011 The Android Open Source Project
+# Copyright 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

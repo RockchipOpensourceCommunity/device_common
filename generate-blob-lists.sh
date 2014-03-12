@@ -42,12 +42,13 @@ then
 fi
 shift
 
-DEVICES="maguro toro toroplus grouper tilapia manta phantasm"
-export LC_ALL=C
-
 repo sync -j32 -n
 repo sync -j32 -n
 repo sync -j2 -l
+
+DEVICES=$(for i in device/*/*/proprietary-blobs.txt ; do basename $(dirname $i) ; done)
+
+export LC_ALL=C
 
 ARCHIVEDIR=archive-$(date +%s)
 if test -d archive-ref
@@ -60,23 +61,19 @@ else
   for DEVICENAME in $DEVICES
   do
     rm -rf out
-    lunch full_$DEVICENAME-user
-    make -j32
+    lunch aosp_$DEVICENAME-user
+    make -j64
     cat out/target/product/$DEVICENAME/installed-files.txt |
       cut -b 15- |
       sort -f > $ARCHIVEDIR/$DEVICENAME-with.txt
   done
-  rm -rf device/lge/*
-  rm -rf hardware/broadcom/nfc
-  rm -rf hardware/msm7k
-  rm -rf hardware/qcom/*
-  rm -rf packages/apps/UnifiedEmail
   rm -rf vendor
+  rm -rf hardware/qcom/gps
   for DEVICENAME in $DEVICES
   do
     rm -rf out
-    lunch full_$DEVICENAME-user
-    make -j32
+    lunch aosp_$DEVICENAME-user
+    make -j64
     cat out/target/product/$DEVICENAME/installed-files.txt |
       cut -b 15- |
       sort -f > $ARCHIVEDIR/$DEVICENAME-without.txt
@@ -115,7 +112,7 @@ do
     (
       cd device/$MANUFACTURERNAME/$DEVICENAME
       git add .
-      git commit -m "$(echo -e 'auto-generated blob list\n\nBug: 4295425')"
+      git commit -m "$(echo -e 'auto-generated blob list for '$DEVICENAME'\n\nBug: 4295425')"
       if test "$1" != "" -a "$2" != ""
       then
         echo uploading to server $1 branch $2
